@@ -1,0 +1,18 @@
+{% extends 'template.html' %}
+
+{% block title%}
+Новый ивент
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Добавить Ивент</h1>
+    <form method="post">
+        <input type="varchar(100)" name="name" id="name" class="form-control" ><br>
+        <input type="date" name="date_start" id="date_start" class="form-control" ><br>
+        <input type="date" name="date_end" id="date_end" class="form-control" ><br>
+        <input type="varchar(100)" name="link" id="link" class="form-control" ><br>
+        <input type="submit" class="btn btn-success" value="Отправить">
+    </form>
+</div>    
+{% endblock %}

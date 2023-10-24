@@ -1,0 +1,15 @@
+{% extends 'template.html' %}
+
+{% block title%}
+Создание вопроса
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Создание вопроса</h1>
+    <form method="post">
+        <input type="VARCHAR(100)" name="text" id="text" class="form-control" ><br>
+        <input type="submit" class="btn btn-success" value="Отправить">
+    </form>
+</div>    
+{% endblock %}
