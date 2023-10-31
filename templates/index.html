@@ -9,8 +9,9 @@
     <h1>Главная страница</h1>
     {% for el in event %}
          <div class="info">
-            <h2>{{ el.name }}</h2>
-                <h2>{{ el.link }}</h2>
+            <h2>{{ el.name }}  {{ el.link }}</h2>
+            <h2>{{ el.date_start }} - {{ el.date_end }}</h2>
+            <a href="/event/{{ el.id }}" class="btn btn-warning">Отчёт</a>
         </div>  
     {% endfor %}        
 </div>    

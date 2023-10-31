@@ -1,0 +1,18 @@
+{% extends 'template.html' %}
+
+{% block title%}
+Изменение ивента
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Изменение Ивента</h1>
+    <form method="post">
+        <input type="varchar(100)" name="name" id="name" class="form-control"  value="{{ update.name }}" ><br>
+        <input type="date" name="date_start" id="date_start" class="form-control" value="{{ update.date_start }}" ><br>
+        <input type="date" name="date_end" id="date_end" class="form-control" value="{{ update.date_end }}" ><br>
+        <input type="varchar(100)" name="link" id="link" class="form-control" value="{{ update.link }}" ><br>
+        <input type="submit" class="btn btn-success" value="Обновить">
+    </form>
+</div>    
+{% endblock %}
