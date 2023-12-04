@@ -1,0 +1,16 @@
+{% extends 'template.html' %}
+
+{% block title%}
+Изменениея ответа на вопрос
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Именение вопроса в форме</h1>
+    <form method="post">
+        <input type="int" name="event_id" id="event_id" value="{{ update.event_id }}" class="form-control" ><br>
+        <input type="int" name="questions_id" id="questions_id" value="{{ update.questions_id }}" class="form-control" ><br>
+        <input type="submit" class="btn btn-success" value="Отправить">
+    </form>
+</div>    
+{% endblock %}

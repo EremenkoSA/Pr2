@@ -9,8 +9,8 @@
     <h1>Список ответов</h1>
     {% for el in all_answers %}
          <div class="info">
-            <h2>{{ el.id }} {{ el.event_id }} {{ el.questions_id }}  {{ el.grade }}</h2>
-            <h2>{{ el.comment }} </h2>
+            <h2>id ответа - {{ el.id }}, id ивента - {{ el.event_id }}, id вопрос - {{ el.questions_id }}, оценка - {{ el.grade }}</h2>
+            <h2>Комментарий - {{ el.comment }} </h2>
             <a href="/a/{{ el.id }}" class="btn btn-warning">Отчёт</a>
         </div>  
     {% endfor %}       

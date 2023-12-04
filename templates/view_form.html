@@ -1,0 +1,17 @@
+{% extends 'template.html' %}
+
+{% block title%}
+{{view_f.id}}
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h2>{{view_f.id}} </h2>
+
+    <div class="allert alert-info">
+        <h2>{{ view_f.id }} {{ view_f.event_id }} {{ view_f.questions_id }}</h2>
+        <a href="/f/{{ view_f.id }}/del" class="btn btn-danger"> Удалить</a>
+        <a href="/f/{{ view_f.id }}/update" class="btn btn-danger"> Изменить</a>
+    </div>         
+</div>    
+{% endblock %}

@@ -27,7 +27,7 @@ class Event(db.Model):
 class Answers(db.Model):
     id = db.Column(db.INT, primary_key=True)
     event_id = db.Column(db.INT, db.ForeignKey('event.id'), nullable=False)
-    questions_id = db.Column(db.VARCHAR(100), db.ForeignKey('qustions.id'), nullable=False)
+    questions_id = db.Column(db.VARCHAR(100), db.ForeignKey('questions.id'), nullable=False)
     grade = db.Column(db.INT, nullable=False)
     comment = db.Column(db.VARCHAR(100))
     # event = db.relationship("Event", back_populates="answers")
@@ -35,15 +35,25 @@ class Answers(db.Model):
     def __repr__(self):
         return '<Answers %r>' % self.id
     
-class Qustions(db.Model):    
+class Questions(db.Model):    
     id = db.Column(db.INT, primary_key=True)
     text = db.Column(db.VARCHAR(100), nullable=False)
     #ans2 = db.relationship('Answers', backref='author', lazy='dynamic')
     #answers2 = db.relationship("Answers", back_populates="questions")
     def __repr__(self):
-        return '<Qustions %r>' % self.id
+        return '<Questions %r>' % self.id
 
 
+class Form(db.Model):
+    id = db.Column(db.INT, primary_key=True)
+    event_id = db.Column(db.INT, db.ForeignKey('event.id'), nullable=False)
+    questions_id = db.Column(db.VARCHAR(100), db.ForeignKey('questions.id'), nullable=False)
+    #grade = db.Column(db.INT, nullable=False)
+    #comment = db.Column(db.VARCHAR(100))
+    # event = db.relationship("Event", back_populates="answers")
+    # questions = db.relationship("Questions", back_populates="answers")
+    def __repr__(self):
+        return '<Form %r>' % self.id
 
 
 
@@ -125,7 +135,7 @@ def created_question():
     if request.method == "POST":
         text = request.form['text']
 
-        questions = Qustions(text=text)
+        questions = Questions(text=text)
         try:
             db.session.add(questions)
             db.session.commit()
@@ -139,21 +149,21 @@ def created_question():
 #Cписок вопросов
 @app.route('/all_q')
 def all_question():
-    all_questions = Qustions.query.all()
+    all_questions = Questions.query.all()
     return render_template("all_question.html", all_questions=all_questions)
 
 
 #Подробности про вопрос
 @app.route('/q/<int:id>')
 def q_view(id):
-    view_q = Qustions.query.get(id)
+    view_q = Questions.query.get(id)
     return render_template("view_question.html", view_q=view_q)
 
 
 #Удаление вопроса
 @app.route('/q/<int:id>/del')
 def q_delete(id):
-    delete_q = Qustions.query.get_or_404(id)
+    delete_q = Questions.query.get_or_404(id)
 
     try:
         db.session.delete(delete_q)
@@ -166,7 +176,7 @@ def q_delete(id):
 #Изменение вопроса
 @app.route('/q/<int:id>/update', methods=['POST', 'GET'])
 def q_update(id):
-    update = Qustions.query.get(id)
+    update = Questions.query.get(id)
     if request.method == "POST":
         update.text = request.form['text']
 
@@ -219,7 +229,8 @@ def survey():
 #Выйти - будем логинится пока заглушка  
 @app.route('/')
 def index():
-    event = Event.query.filter(Event.date_start > current_date).all()
+    #event = Event.query.filter(Event.date_start > current_date).all()
+    event = Event.query.all()
     return render_template("index.html", event=event)
 
 
@@ -260,6 +271,71 @@ def event_update(id):
         return render_template("update_event.html", update=update)    
     
 
+
+
+
+
+
+
+#ФОРМА ид вопроса ид ивента
+#Создание ответа на определённый вопрос 
+@app.route('/create_f', methods=['POST', 'GET'])
+def created_form():
+    if request.method == "POST":
+        event_id = request.form['event_id']
+        questions_id = request.form['questions_id']
+
+        form = Form(event_id=event_id, questions_id=questions_id)
+        try:
+            db.session.add(form)
+            db.session.commit()
+            return redirect('/')
+        except:
+            return "Ошибка при довавлении"
+    else:
+        return render_template("created_form.html")
+
+
+#Cписок ответов
+@app.route('/all_f')
+def all_form():
+    all_form = Form.query.all()
+    return render_template("all_form.html", all_form=all_form)
+
+
+#Подробности про ответ
+@app.route('/f/<int:id>')
+def f_view(id):
+    view_f = Form.query.get(id)
+    return render_template("view_form.html", view_f=view_f)
+
+#Удаление ответа
+@app.route('/f/<int:id>/del')
+def f_delete(id):
+    delete_f = Form.query.get_or_404(id)
+
+    try:
+        db.session.delete(delete_f)
+        db.session.commit()
+        return redirect('/all_f')
+    except:
+        return "Приудалении произошла ошибка"
+
+
+#Изменение ответа
+@app.route('/f/<int:id>/update', methods=['POST', 'GET'])
+def f_update(id):
+    update = Form.query.get(id)
+    if request.method == "POST":
+        update.event_id = request.form['event_id']
+        update.questions_id = request.form['questions_id']
+        try:
+            db.session.commit()
+            return redirect('/all_f')
+        except:
+            return "Ошибка при довавлении"
+    else:
+        return render_template("update_f.html", update=update)   
 
 
 
