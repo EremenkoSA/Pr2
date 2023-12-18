@@ -5,8 +5,16 @@
 {% endblock %}
 
 {% block body%}
+<main>
+    <div id="qrcode"></div>
+</main>
+
+<script>
+    var qrcode = new QRCode("qrcode",
+    "{{ view.link }}");
+</script>
 <div class="container">
-    <h1>Настройки мероприятия</h1>
+    <h1>Отчет</h1>
     <div class="block2">
         <div class="info">
             <h2 class="name">{{ view.name }} </h2>
@@ -14,13 +22,34 @@
             <h2 class="link">{{ view.link }}</h2>     
         </div>      
     </div> 
-    <div class="settings">
+    <!-- <div class="settings">
         <a href="/event/{{ view.id  }}/del" class="delete"> Удалить</a>
         <a href="/event/{{ view.id}}/update" class="change"> Изменить</a>
         <a href="/create_q" class="add"> Добавить вопрос</a>
     </div>
     <div class="list">
         <a href="/all_q">Список вопросов</a>
+    </div> -->
+
+    <h2>Список ответов</h2>
+    <div class="questions-answers">
+        <div class="block_column">
+            {% for el in view3 %}
+                <div class="info_column">
+                    <h2>{{ el.id }}. {{el.text}}</h2>
+                </div> 
+            {% endfor %} 
+        </div>
+
+        <div class="block_column">
+            {% for el in view2 %}
+                <div class="info_column">
+                    <h2>{{ el.comment }} </h2>
+                </div> 
+            {% endfor %}  
+        </div>
     </div>
+
+
 </div>    
 {% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=“utf-8”>
+<title>Оценка и комментарий</title>
+
+<!-- Стиль страницы -->
+<style>
+    #comment-field {
+        display: none;
+    }
+</style>
+    <script>
+        const ratingInput = document.querySelector('[name="rating"]');
+        const commentField = document.querySelector('#comment-field');
+
+        ratingInput.addEventListener('input', function () {
+        if (+this.value == 1 || +this.value == 2) {
+            commentField.style.display = 'block';
+        } else {
+            commentField.style.display = 'none';
+        }
+        });
+    </script>
+</head>
+<body>
+<h1>Оцените и оставьте комментарий</h1>
+
+<form action="/submit-comment" method="post">
+
+    <!-- Оценка -->
+    <input type="number" name="rating" min="1" max="5"/>
+
+    <!-- Комментарий -->
+    <label for="comment-field">Ваш комментарий:</label>
+    <br/>
+    <textarea name="comment" id="comment-field"></textarea>
+
+    <button type="submit">Отправить</button>
+</form>
+</body>
+</html>

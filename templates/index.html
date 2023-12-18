@@ -5,14 +5,74 @@
 {% endblock %}
 
 {% block body%}
-<div class="container">
-    <h1>Главная страница</h1>
-    {% for el in event %}
-         <div class="info">
-            <h2>{{ el.name }}  {{ el.link }}</h2>
-            <h2>{{ el.date_start }} - {{ el.date_end }}</h2>
-            <a href="/event/{{ el.id }}" class="btn btn-warning">Отчёт</a>
-        </div>  
-    {% endfor %}        
-</div>    
+<div class="main">
+    <div class="container">
+        <h1>Главная страница</h1>
+        <div class="ongoing">
+            <h2>Текущие мероприятия</h2>
+            <div class="block">
+                {% for el in ongoing_event %}
+                    <div class="info">
+                        <h2 class="name">{{ el.name }} </h2>
+                        <h2 class="date">{{ el.date_start }} - {{ el.date_end }}</h2>
+                        <h2 class="link">{{ el.link }}</h2>
+                        <div class="data">
+                            <a href="/event/{{ el.id }}" class="settings">
+                                <img src="../static/css/img/img_79951.png" height="30px"/>
+                            </a>  
+                            <a href="/event/report/{{ el.id }}" class="report">
+                                <img src="../static/css/img/Statistics-Transparent.png" height="30px"/>
+                            </a> 
+                            <a href="/event/{{ el.id }}" class="qr">
+                                <img src="../static/css/img/img_377300.png" height="30px"/>
+                            </a> 
+                        </div>
+                    </div> 
+                {% endfor %} 
+            </div> 
+            <h2>Будущие мероприятия</h2>
+            <div class="block">
+                {% for el in future_event %}
+                    <div class="info">
+                        <h2 class="name">{{ el.name }} </h2>
+                        <h2 class="date">{{ el.date_start }} - {{ el.date_end }}</h2>
+                        <h2 class="link">{{ el.link }}</h2>  
+                        <div class="data">
+                            <a href="/event/{{ el.id }}" class="settings">
+                                <img src="../static/css/img/img_79951.png" height="30px"/>
+                            </a>  
+                            <a href="/event/report/{{ el.id }}" class="report">
+                                <img src="../static/css/img/Statistics-Transparent.png" height="30px"/>
+                            </a> 
+                            <a href="/event/{{ el.id }}" class="qr">
+                                <img src="../static/css/img/img_377300.png" height="30px"/>
+                            </a> 
+                        </div>
+                    </div>  
+                {% endfor %} 
+            </div> 
+            <h2>Прошедшие мероприятия</h2>
+            <div class="block">
+                {% for el in past_event %}
+                    <div class="info">
+                        <h2 class="name">{{ el.name }} </h2>
+                        <h2 class="date">{{ el.date_start }} - {{ el.date_end }}</h2>
+                        <h2 class="link">{{ el.link }}</h2>
+                        <div class="data">
+                            <a href="/event/{{ el.id }}" class="settings">
+                                <img src="../static/css/img/img_79951.png" height="30px"/>
+                            </a>  
+                            <a href="/event/report/{{ el.id }}" class="report">
+                                <img src="../static/css/img/Statistics-Transparent.png" height="30px"/>
+                            </a> 
+                            <a href="/event/{{ el.id }}" class="qr">
+                                <img src="../static/css/img/img_377300.png" height="30px"/>
+                            </a> 
+                        </div>
+                    </div>  
+                {% endfor %} 
+            </div> 
+        </div>      
+    </div>    
+</div>
 {% endblock %}

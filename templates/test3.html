@@ -1,0 +1,41 @@
+{% extends 'template.html' %}
+
+{% block title%}
+Вопросы по ивенту тест
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Вопросы по ивенту тест</h1>
+    {% for el in qq %}
+         <div class="info">
+            <h2>{{ el.1.id }}Вопрос-{{ el.1.text }}</h2>
+        </div>  
+    {% endfor %}
+    {% for el in arr %}
+         <div class="info">
+            <h2>{{ el }}</h2>
+        </div>  
+    {% endfor %}
+    {% for el in res %}
+         <div class="info">
+            <h2>Вопрос №{{ el.0.questions_id }}, Оценка-{{el.0.grade}}, Комментарий-{{el.0.comment}}</h2>
+        </div>  
+    {% endfor %} 
+    <input type="text" id="num">
+    <button id="btn">Button</button>
+    <div id="res"></div>
+    <h2>{{res[0].0}}</h2>
+
+    <script>
+        var arr = [];
+        document.getElementById("btn").addEventListener("click", function() {
+          var num = parseInt(document.getElementById("num").value)
+          if(!num) return; // ?
+          arr.push(num);
+          var avg = arr.reduce(function(a, b) { return a + b; }) / arr.length;
+          document.getElementById("res").innerText = avg;
+        })
+        </script>
+</div>    
+{% endblock %}

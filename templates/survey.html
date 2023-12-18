@@ -1,0 +1,36 @@
+{% extends 'template.html' %}
+
+{% block title%}
+{{view.id}}
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>Отчет</h1>
+    <div class="block2">
+        <div class="info">
+            <h2 class="name">{{ view.name }} </h2>
+            <h2 class="date">{{ view.date_start }} - {{ view.date_end }}</h2>
+            <h2 class="link">{{ view.link }}</h2>     
+        </div>      
+    </div> 
+
+    <h1>Список ответов</h1>
+    <div class="block">
+        {% for el in view3 %}
+            <div class="info">
+                <h2>{{view3.text}}</h2>
+                <h2>{{ el.id }} {{ el.text }} </h2>
+            </div> 
+        {% endfor %}  
+    </div>
+
+    <!-- <div class="block">
+        {% for el in view3 %}
+            <div class="info">
+                <h2>{{el.text}}</h2>
+            </div> 
+        {% endfor %} 
+    </div> -->
+</div>    
+{% endblock %}

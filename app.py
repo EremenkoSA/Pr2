@@ -1,17 +1,63 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 import qrcode
 from fpdf import FPDF
+from flask_login import LoginManager
+from flask_login import login_user, login_required
+from flask_security import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'gfgfgghghgfhgfhgfhgfhfgghghghghghg'
 app.config['SQLALCHEMY_DATABASE_URI'] = "mariadb+mariadbconnector://root:1111@127.0.0.1:3306/pract"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 current_date = datetime.date.today()
+
+
+
+login_manager = LoginManager(app)
+# login_manager.init_app(app)
+# login_manager.login_view = 'login'
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.INT, primary_key=True)
+    login = db.Column(db.VARCHAR(100), unique=True, nullable=False)
+    password = db.Column(db.VARCHAR(255), nullable=False)
+    is_active= db.Column(db.Boolean, default=True, nullable=False)
+    def __init__(self, login, password):
+        self.login = login
+        self.password = password
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
+
+    def __repr__(self):
+        return '<User %r>' % self.id
+
+# @manager.user_loader
+# def load_user(user_id):
+#     return User.query.get_id(int(user_id))
+
+
+# def get_id(self):
+#         return str(self.id)
 
 class Event(db.Model):
     id = db.Column(db.INT, primary_key=True)
@@ -56,7 +102,181 @@ class Form(db.Model):
         return '<Form %r>' % self.id
 
 
+@app.route('/login', methods=['POST', 'GET'])
+def login_page():
+    login = request.form.get('login')
+    password = request.form.get('password')
+    if login and password:
+        user = User.query.filter_by(login=login).first
+        #user.is_active = True
 
+        if user and check_password_hash(user().password, password):
+            login_user(user)
+
+            next_page = request.args.get('next')
+
+            redirect(next_page)
+        else:
+            flash('Login or password not correct')   
+    else:
+        flash('Please fill login and password')  
+    
+    return render_template('login.html')
+
+
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    login = request.form.get('login')
+    password = request.form.get('password')
+    password2 = request.form.get('password2')
+
+    if request.method == 'POST':
+        if not (login or password or password2):
+            flash('Please, fill al fields')
+        elif password != password2:
+            flash('Passwords are not equel')
+        else:
+            hash_pwd = generate_password_hash(password)
+            new_user = User(login=login, password=hash_pwd) 
+            db.session.add(new_user)
+            db.session.commit()
+
+            return redirect(url_for('login_page'))
+    return render_template('register.html')
+
+
+@app.route('/logout', methods=['POST', 'GET'])
+@login_required
+def logout():
+    login_user()
+    return redirect(url_for('/create_a'))
+
+@app.after_request
+def redirect_to_signin(responce):
+    if responce.status_code == 401:
+        return redirect(url_for('login_page') + '?next=' + request.url)
+
+    return responce    
+
+@app.route('/test/<int:id>')
+def re1(id):
+    results = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).all()
+    for form, questions in results:
+        print(form.questions_id, questions.text) 
+    return render_template("test.html", res = results)    
+    
+@app.route('/test3/<int:id>')
+def re3(id):
+    qq= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).all()
+    results = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).order_by(Questions.id).order_by(Answers.grade).all()
+    qq1= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).count()
+    
+    print(qq1)
+    sum = 0
+    arr = [0]*(10)
+    arr2 = [0]*qq1
+
+    arr3=[0]*10
+    arr4=[0]*qq1
+    print(10+0.5)
+    i = 1
+    for i in range(10):
+        for answers, questions in results:
+            if questions.id == i:  
+                sum = sum + answers.grade
+        rey = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).count()
+        if rey != 0:
+            arr[i-1] = sum/rey 
+        print(rey)
+        sum = 0
+        i = i + 1                      
+    # for answers, questions in results:
+    #     if questions.id == i: 
+    #         sum = sum + answers.grade
+    #     arr[i] = sum 
+    #     i = i + 1
+    print(arr)
+    for i in range(qq1):
+        for j in range(10):
+            if arr[j] != 0:
+                arr2[i] = arr[j]
+                del arr[j]
+                break 
+    print(arr2)      
+    rey2 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).count()
+    rey3 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).all()
+
+    # for i in range(10):
+    #         if questions.id == i:
+    #             rey2 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).count()
+    #             rey3 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).all()
+    #             for answers, questions in rey3:
+    #                 if isinstance(rey2/2, int) == True:
+    #                     rey4 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).get(rey2/2)
+    #                     print(rey4)
+    #                     #arr3[i] = (answers.grade[rey2/2] + answers.grade[(rey2/2)+1])/2
+    #                 else:
+    #                     # print(1337)
+    #                     b=round(rey2/2)
+    #                     print(b)
+    #                     # print(1337)
+    #                     # print((rey2+1)/2)
+    #                     # print(1337)
+    #                     # print((rey2/2)+0.5)
+    #                     #arr3[i] = answers.grade[b]
+    #                     rey5 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).get(b)
+    #                     print(rey5)
+    #                     #arr3[i] = answers.grade
+    #                     print(9999)
+    #                     print(arr3)    
+    #         i = i + 1
+    # print              
+    return render_template("test3.html", res = results, qq =qq, arr = arr2)  
+
+@app.route('/test2/<int:id>',methods=['POST', 'GET'])
+def re2(id):
+    results = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).all()
+    for form, questions in results:
+        print(form.id)
+    ss = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).count()
+    print(ss)
+    for form in range(1, ss):
+        print()  
+
+    if request.method == "POST":  ##РОБЕ ЕСЛИ Id form последовательно и вплоть до 1
+        for form, questions in results:
+            event_id = request.form['event_id'+str(form.id)]
+            questions_id = request.form['questions_id'+str(form.id)]
+            grade = request.form['grade'+str(form.id)]
+            comment = request.form['comment'+str(form.id)]
+
+        # event_id_3 = request.form['event_id_3']
+        # questions_id_3 = request.form['questions_id_3']
+        # grade_3 = request.form['grade_3']
+        # comment_3 = request.form['comment_3']
+
+        # event_id_4 = request.form['event_id_4']
+        # questions_id_4 = request.form['questions_id_4']
+        # grade_4 = request.form['grade_4']
+        # comment_4 = request.form['comment_4']
+
+        # event_id_5 = request.form['event_id_5']
+        # questions_id_5 = request.form['questions_id_5']
+        # grade_5 = request.form['grade_5']
+        # comment_5 = request.form['comment_5']
+
+            answers = Answers(event_id=event_id, questions_id=questions_id, grade=grade, comment=comment)
+        # answers3 = Answers(event_id=event_id_3, questions_id=questions_id_3, grade=grade_3, comment=comment_3)
+        # answers4 = Answers(event_id=event_id_4, questions_id=questions_id_4, grade=grade_4, comment=comment_4)
+        # answers5 = Answers(event_id=event_id_5, questions_id=questions_id_5, grade=grade_5, comment=comment_5)
+            db.session.add(answers)
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return "Ошибка при довавлении"
+    else:         
+        return render_template("test2.html", res=results)
 
 
 #Создание ответа на определённый вопрос 
@@ -81,10 +301,19 @@ def created_answers():
 
 #Cписок ответов
 @app.route('/all_a')
-def all_answer():
-    all_answers = Answers.query.all()
-    return render_template("all_answer.html", all_answers=all_answers)
 
+def all_answer():
+    #all_answers = Answers.query.all()
+    all_answers = User.query.filter_by(login='raiden').first
+    print(all_answers().is_active)
+    print(all_answers().password)
+    print(all_answers().login)
+    print(all_answers().id)
+    return render_template("all_answer.html", el=all_answers)
+
+@app.route('/123')
+def fdz():
+    return render_template("main.html")
 
 #Подробности про ответ
 @app.route('/a/<int:id>')
@@ -226,18 +455,34 @@ def survey():
 #Главная страница С кнопками Главная, Добавить опрос, Помощь, Выйти
 #Добавить - опрос пока кидает на добавление вопроса
 #Помощь - нужно написать инструкцию для изпользования сайти
-#Выйти - будем логинится пока заглушка  
+#Выйти - будем логиниться пока заглушка  
 @app.route('/')
 def index():
-    #event = Event.query.filter(Event.date_start > current_date).all()
-    event = Event.query.all()
-    return render_template("index.html", event=event)
+    ongoing_event = Event.query.filter(Event.date_start <= current_date, Event.date_end >= current_date).all()
+    future_event = Event.query.filter(Event.date_start > current_date).all()
+    past_event = Event.query.filter(Event.date_end < current_date).all()
+    return render_template("index.html", ongoing_event=ongoing_event, future_event=future_event, past_event=past_event)
 
 
 @app.route('/event/<int:id>')
 def event_view(id):
     view = Event.query.get(id)
     return render_template("view.html", view=view)
+
+@app.route('/event/report/<int:id>')
+def report_view(id):
+    view = Event.query.get(id)
+    view2 = Answers.query.filter_by(event_id = id).all()
+    view3 = Questions.query.filter_by(id = Answers.questions_id).all()
+    return render_template("report.html", view=view, view2=view2, view3=view3)
+
+
+# @app.route('/event/survey/<int:id>')
+# def survey_view(id):
+#     view = Event.query.get(id)
+#     view2 = Form.query.filter_by(event_id = id).all()
+#     view3 = Questions.query.filter_by(id = Answers.questions_id).all()
+#     return render_template("report.html", view=view, view2=view2, view3=view3)
 
 
 #Удаление ивента
