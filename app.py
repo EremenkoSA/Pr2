@@ -12,9 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gfgfgghghgfhgfhgfhgfhfgghghghghghg'
-app.config['SQLALCHEMY_DATABASE_URI'] = "mariadb+mariadbconnector://root:1111@127.0.0.1:3306/pract"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object('config')
 db = SQLAlchemy(app)
 
 current_date = datetime.date.today()
@@ -22,12 +20,14 @@ current_date = datetime.date.today()
 
 
 login_manager = LoginManager(app)
-# login_manager.init_app(app)
-# login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
+
+###КЛАССЫ
+###КЛАССЫ
+###КЛАССЫ
 class User(db.Model, UserMixin):
     id = db.Column(db.INT, primary_key=True)
     login = db.Column(db.VARCHAR(100), unique=True, nullable=False)
@@ -52,13 +52,6 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return '<User %r>' % self.id
 
-# @manager.user_loader
-# def load_user(user_id):
-#     return User.query.get_id(int(user_id))
-
-
-# def get_id(self):
-#         return str(self.id)
 
 class Event(db.Model):
     id = db.Column(db.INT, primary_key=True)
@@ -66,8 +59,6 @@ class Event(db.Model):
     date_start = db.Column(db.DATE, nullable=False)
     date_end = db.Column(db.DATE, nullable=False)
     link = db.Column(db.VARCHAR(100), nullable=False)
-    #ans = db.relationship('Answers', backref='author', lazy='dynamic')
-    #answers = db.relationship("Answers", back_populates="event")
     def __repr__(self):
         return '<Event %r>' % self.id
  
@@ -77,16 +68,12 @@ class Answers(db.Model):
     questions_id = db.Column(db.VARCHAR(100), db.ForeignKey('questions.id'), nullable=False)
     grade = db.Column(db.INT, nullable=False)
     comment = db.Column(db.VARCHAR(100))
-    # event = db.relationship("Event", back_populates="answers")
-    # questions = db.relationship("Questions", back_populates="answers")
     def __repr__(self):
         return '<Answers %r>' % self.id
     
 class Questions(db.Model):    
     id = db.Column(db.INT, primary_key=True)
     text = db.Column(db.VARCHAR(100), nullable=False)
-    #ans2 = db.relationship('Answers', backref='author', lazy='dynamic')
-    #answers2 = db.relationship("Answers", back_populates="questions")
     def __repr__(self):
         return '<Questions %r>' % self.id
 
@@ -95,14 +82,11 @@ class Form(db.Model):
     id = db.Column(db.INT, primary_key=True)
     event_id = db.Column(db.INT, db.ForeignKey('event.id'), nullable=False)
     questions_id = db.Column(db.VARCHAR(100), db.ForeignKey('questions.id'), nullable=False)
-    #grade = db.Column(db.INT, nullable=False)
-    #comment = db.Column(db.VARCHAR(100))
-    # event = db.relationship("Event", back_populates="answers")
-    # questions = db.relationship("Questions", back_populates="answers")
     def __repr__(self):
         return '<Form %r>' % self.id
 
 
+#Авторизация просит пароль и логин, после успешной авторизации кинет на прошлую страницу 
 @app.route('/login', methods=['POST', 'GET'])
 def login_page():
     login = request.form.get('login')
@@ -128,6 +112,7 @@ def login_page():
     return render_template('login.html')
 
 
+##Регистрация нужно ввести логин(уникальный) и дважды пароль
 @app.route('/register', methods=['POST', 'GET'])
 #@login_required
 def register():
@@ -150,45 +135,43 @@ def register():
     return render_template('register.html')
 
 
+##Просто логаут
 @app.route('/logout', methods=['POST', 'GET'])
 @login_required
 def logout():
     logout_user()
     return redirect('login')
 
+
+##Если пользователя кидает на страницу логин, вернёт неё его на прошлуе при авторизации
 @app.after_request
 def redirect_to_signin(responce):
     if responce.status_code == 401:
         return redirect(url_for('login_page') + '?next=' + request.url)
 
-    return responce    
-
-@app.route('/test/<int:id>')
+    return responce
+    
+##Вопросы по определённому ивенту
+@app.route('/event_q/<int:id>') 
 @login_required
 def re1(id):
     results = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).all()
     for form, questions in results:
         print(form.questions_id, questions.text) 
-    return render_template("test.html", res = results)    
-    
-@app.route('/event/report/<int:id>/r')
+    return render_template("event_questions.html", res = results)    
+
+
+#Отчёт с комментариями
+@app.route('/event/report/<int:id>/admin')
 @login_required
-def re3(id):
+def admin_report(id):
     view = Event.query.get(id)
-    view2 = Answers.query.filter_by(event_id = id).all()
-    view3 = Questions.query.filter_by(id = Answers.questions_id).all()
     qq= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).all()
     results = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).order_by(Questions.id).order_by(Answers.grade).all()
     qq1= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).count()
-    
-    print(qq1)
     sum = 0
     arr = [0]*(10)
     arr2 = [0]*qq1
-
-    arr3=[0]*10
-    arr4=[0]*qq1
-    print(10+0.5)
     i = 1
     for i in range(10):
         for answers, questions in results:
@@ -200,11 +183,6 @@ def re3(id):
         print(rey)
         sum = 0
         i = i + 1                      
-    # for answers, questions in results:
-    #     if questions.id == i: 
-    #         sum = sum + answers.grade
-    #     arr[i] = sum 
-    #     i = i + 1
     print(arr)
     for i in range(qq1):
         for j in range(10):
@@ -212,37 +190,11 @@ def re3(id):
                 arr2[i] = arr[j]
                 del arr[j]
                 break 
-    print(arr2)      
-    rey2 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).count()
-    rey3 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).all()
+    print(arr2)               
+    return render_template("report_admin.html", res = results, qq =qq, arr = arr2, view=view) 
 
-    # for i in range(10):
-    #         if questions.id == i:
-    #             rey2 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).count()
-    #             rey3 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).all()
-    #             for answers, questions in rey3:
-    #                 if isinstance(rey2/2, int) == True:
-    #                     rey4 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).get(rey2/2)
-    #                     print(rey4)
-    #                     #arr3[i] = (answers.grade[rey2/2] + answers.grade[(rey2/2)+1])/2
-    #                 else:
-    #                     # print(1337)
-    #                     b=round(rey2/2)
-    #                     print(b)
-    #                     # print(1337)
-    #                     # print((rey2+1)/2)
-    #                     # print(1337)
-    #                     # print((rey2/2)+0.5)
-    #                     #arr3[i] = answers.grade[b]
-    #                     rey5 = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).order_by(Answers.grade).get(b)
-    #                     print(rey5)
-    #                     #arr3[i] = answers.grade
-    #                     print(9999)
-    #                     print(arr3)    
-    #         i = i + 1
-    # print              
-    return render_template("test3r.html", res = results, qq =qq, arr = arr2, view=view, view2=view2, view3=view3) 
 
+#Отчёт без комментариев
 @app.route('/event/report/<int:id>')
 def re4(id):
     view = Event.query.get(id)
@@ -273,7 +225,9 @@ def re4(id):
                 break                           
     return render_template("report.html", qq =qq, arr = arr2, view=view, view2=view2, view3=view3)   
 
-@app.route('/test2/<int:id>',methods=['POST', 'GET'])
+
+#Анкета по ивенту с id-ком
+@app.route('/event/form/<int:id>',methods=['POST', 'GET'])
 def re2(id):
     results = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).all()
     for form, questions in results:
@@ -283,32 +237,14 @@ def re2(id):
     for form in range(1, ss):
         print()  
 
-    if request.method == "POST":  ##РОБЕ ЕСЛИ Id form последовательно и вплоть до 1
+    if request.method == "POST":
         for form, questions in results:
             event_id = request.form['event_id'+str(form.id)]
             questions_id = request.form['questions_id'+str(form.id)]
             grade = request.form['grade'+str(form.id)]
             comment = request.form['comment-field'+str(form.id)]
 
-        # event_id_3 = request.form['event_id_3']
-        # questions_id_3 = request.form['questions_id_3']
-        # grade_3 = request.form['grade_3']
-        # comment_3 = request.form['comment_3']
-
-        # event_id_4 = request.form['event_id_4']
-        # questions_id_4 = request.form['questions_id_4']
-        # grade_4 = request.form['grade_4']
-        # comment_4 = request.form['comment_4']
-
-        # event_id_5 = request.form['event_id_5']
-        # questions_id_5 = request.form['questions_id_5']
-        # grade_5 = request.form['grade_5']
-        # comment_5 = request.form['comment_5']
-
             answers = Answers(event_id=event_id, questions_id=questions_id, grade=grade, comment=comment)
-        # answers3 = Answers(event_id=event_id_3, questions_id=questions_id_3, grade=grade_3, comment=comment_3)
-        # answers4 = Answers(event_id=event_id_4, questions_id=questions_id_4, grade=grade_4, comment=comment_4)
-        # answers5 = Answers(event_id=event_id_5, questions_id=questions_id_5, grade=grade_5, comment=comment_5)
             db.session.add(answers)
         try:
             db.session.commit()
@@ -316,10 +252,10 @@ def re2(id):
         except:
             return "Ошибка при довавлении"
     else:         
-        return render_template("test2.html", res=results)
+        return render_template("form.html", res=results)
 
 
-#Создание ответа на определённый вопрос 
+#Создание ответа на определённый вопрос, нужно было для теста можно убрать  
 @app.route('/create_a', methods=['POST', 'GET'])
 @login_required
 def created_answers():
@@ -340,7 +276,7 @@ def created_answers():
         return render_template("created_answers.html")
 
 
-#Cписок ответов
+#Cписок всех ответов нужно для теста можно убрать
 @app.route('/all_a')
 @login_required
 def all_answer():
@@ -352,19 +288,16 @@ def all_answer():
     print(all_answers().id)
     return render_template("all_answer.html", el=all_answers)
 
-@app.route('/123')
-@login_required
-def fdz():
-    return render_template("main.html")
 
-#Подробности про ответ
+#Подробности про ответ по id 
 @app.route('/a/<int:id>')
 @login_required
 def a_view(id):
     view_a = Answers.query.get(id)
     return render_template("view_answer.html", view_a=view_a)
 
-#Удаление ответа
+
+#Удаление ответа по id
 @app.route('/a/<int:id>/del')
 @login_required
 def a_delete(id):
@@ -378,7 +311,7 @@ def a_delete(id):
         return "Приудалении произошла ошибка"
 
 
-#Изменение ответа
+#Изменение ответа по шв
 @app.route('/a/<int:id>/update', methods=['POST', 'GET'])
 @login_required
 def a_update(id):
@@ -396,8 +329,6 @@ def a_update(id):
             return "Ошибка при довавлении"
     else:
         return render_template("update_a.html", update=update)    
-
-
 
 
 #ВОПРОСЫ
@@ -421,7 +352,7 @@ def created_question():
         return render_template("created_question.html")
 
 
-#Cписок вопросов
+#Cписок всех вопросов
 @app.route('/all_q')
 @login_required
 def all_question():
@@ -429,23 +360,15 @@ def all_question():
     return render_template("all_question.html", all_questions=all_questions)
 
 
-#Подробности про вопрос
+#Подробности про вопрос по id
 @app.route('/q/<int:id>')
 @login_required
 def q_view(id):
     view_q = Questions.query.get(id)
     return render_template("view_question.html", view_q=view_q)
 
-@app.route('/spravka')
-def spravka():
-    return render_template("spravka.html")
 
-@app.route('/spravka/r')
-@login_required
-def spravkar():
-    return render_template("spravkar.html")
-
-#Удаление вопроса
+#Удаление вопроса по id
 @app.route('/q/<int:id>/del')
 @login_required
 def q_delete(id):
@@ -459,7 +382,7 @@ def q_delete(id):
         return "Приудалении произошла ошибка"
 
 
-#Изменение вопроса
+#Изменение вопроса по id
 @app.route('/q/<int:id>/update', methods=['POST', 'GET'])
 @login_required
 def q_update(id):
@@ -476,8 +399,16 @@ def q_update(id):
         return render_template("update_q.html", update=update)    
 
 
+#Справка для обычных пользователей, доступна по кнопке Помощь(редачить ссылку в template.html)
+@app.route('/spravka')
+def spravka():
+    return render_template("spravka.html")
 
-
+#Справка для админа доступна только по ссылке
+@app.route('/spravka/admin')
+@login_required
+def spravka_admin():
+    return render_template("spravkar.html")
 
 
 
@@ -488,13 +419,10 @@ def q_update(id):
 #ИВЕНТЫ
 #ИВЕНТЫ
 #ИВЕНТЫ
-#Создание ивента заносим данные в бд и создаём qrcode сохраняем в отдельную папку
-#Назнание пдфки с qrcode будет id ивента + .pdf 
-#Будем просматривать прошедшие мероприятия и удалять qrcode 
+#Создание ивента при создании вместа ссылки ставим заглушку 
 @app.route('/create_e', methods=['POST', 'GET'])
 @login_required
 def survey():
-    #return render_template("survey.html")
     if request.method == "POST":
         name = request.form['name']
         date_start = request.form['date_start']
@@ -512,9 +440,9 @@ def survey():
 
 
 #Главная страница С кнопками Главная, Добавить опрос, Помощь, Выйти
-#Добавить - опрос пока кидает на добавление вопроса
-#Помощь - нужно написать инструкцию для изпользования сайти
-#Выйти - будем логиниться пока заглушка  
+#Добавить - кидает на добавление ивента
+#Помощь - инструкцию для изпользования сайти
+#Выйти - если не авторизирован кинет на логин, если авторизирован разлогинит и кинет на логин  
 @app.route('/')
 def index():
     ongoing_event = Event.query.filter(Event.date_start <= current_date, Event.date_end >= current_date).all()
@@ -522,11 +450,15 @@ def index():
     past_event = Event.query.filter(Event.date_end < current_date).all()
     return render_template("index.html", ongoing_event=ongoing_event, future_event=future_event, past_event=past_event)
 
+
+#Показывает Qr-code по ид ивента, генерирует его по ссылке ивента
 @app.route('/event/qr/<int:id>')
 def qr_view(id):
     view = Event.query.get(id)
     return render_template("qr.html", view=view)
 
+
+#Показывает инфу по ивенту, кнопка добавление вопроса добавляет вопрос к общему пулу, а не в сам ивента 
 @app.route('/event/<int:id>')
 @login_required
 def event_view(id):
@@ -534,16 +466,7 @@ def event_view(id):
     return render_template("view.html", view=view)
 
 
-
-# @app.route('/event/survey/<int:id>')
-# def survey_view(id):
-#     view = Event.query.get(id)
-#     view2 = Form.query.filter_by(event_id = id).all()
-#     view3 = Questions.query.filter_by(id = Answers.questions_id).all()
-#     return render_template("report.html", view=view, view2=view2, view3=view3)
-
-
-#Удаление ивента
+#Удаление ивента, если в формах или ответа есть не даст удалить, доступно в '/event/<int:id>'
 @app.route('/event/<int:id>/del')
 @login_required
 def event_delete(id):
@@ -557,7 +480,7 @@ def event_delete(id):
         return "Приудалении произошла ошибка"
 
 
-#Изменение ивента
+#Изменение ивента, доступно в '/event/<int:id>'
 @app.route('/event/<int:id>/update', methods=['POST', 'GET'])
 @login_required
 def event_update(id):
@@ -575,10 +498,6 @@ def event_update(id):
     else:
         return render_template("update_event.html", update=update)    
     
-
-
-
-
 
 
 
@@ -602,7 +521,7 @@ def created_form():
         return render_template("created_form.html")
 
 
-#Cписок ответов
+#Cписок всех форм(какой вопрос к какому ивенту)
 @app.route('/all_f')
 @login_required
 def all_form():
@@ -610,14 +529,15 @@ def all_form():
     return render_template("all_form.html", all_form=all_form)
 
 
-#Подробности про ответ
+#Подробности оперделённую форму нужно для тестов
 @app.route('/f/<int:id>')
 @login_required
 def f_view(id):
     view_f = Form.query.get(id)
     return render_template("view_form.html", view_f=view_f)
 
-#Удаление ответа
+
+#Удаление формы, если надо убрать возможность ответа на вопрос в необходимом ивенте 
 @app.route('/f/<int:id>/del')
 @login_required
 def f_delete(id):
@@ -631,7 +551,7 @@ def f_delete(id):
         return "Приудалении произошла ошибка"
 
 
-#Изменение ответа
+#Изменение формы
 @app.route('/f/<int:id>/update', methods=['POST', 'GET'])
 @login_required
 def f_update(id):
@@ -646,8 +566,6 @@ def f_update(id):
             return "Ошибка при довавлении"
     else:
         return render_template("update_f.html", update=update)   
-
-
 
 
 if __name__ == "__main__":
