@@ -259,3 +259,114 @@ padding: 10px 15px;
 box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
+.info_column2{
+    display: flex;
+    background-color: rgb(28, 28, 28);
+    border: 1px solid rgb(70, 70, 70);
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    }
+
+.questions_and_grades{
+    display: flex;
+    justify-content: space-between;
+}
+.questions {
+    width: 100%;
+}
+.grades {
+    width: 15%;
+}
+.info2 {
+    display: flex;
+}
+.info3 {
+    display: flex;
+    color: #2c90ca;
+    margin-top: 30px;
+    justify-content: center;
+}
+.info_q {
+    width: 10%;
+    background-color: rgb(28, 28, 28);
+    border: 1px solid rgb(70, 70, 70);
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+.info_g {
+    width: 10%;
+    background-color: rgb(28, 28, 28);
+    border: 1px solid rgb(70, 70, 70);
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+.info_c {
+    width: 100%;
+    background-color: rgb(28, 28, 28);
+    border: 1px solid rgb(70, 70, 70);
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.info_q_q {
+    width: 10%;
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+}
+.info_g_g {
+    width: 10%;
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+}
+.info_c_c {
+    width: 100%;
+    margin: 20px 1% 0 0;
+    border-radius: 20px;
+    padding: 10px 15px;
+    justify-content: center;
+}
+
+.qr-code {
+    margin-top: 20px;
+    
+  }
+
+.code {
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+  }
+.tt {
+    background-color: beige;
+}
+
+.help{
+    text-align: left;
+    background-color: rgb(70, 70, 70);
+    padding: 2% 2% 2% 2%;
+    border-radius: 20px;
+}
+
+.help h2{
+    margin: 1%;
+}
+
+.imgH{
+    margin: 1% 1% ;
+}

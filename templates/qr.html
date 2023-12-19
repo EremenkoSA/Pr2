@@ -1,0 +1,25 @@
+{% extends 'template.html' %}
+
+{% block title%}
+QR-code
+{% endblock %}
+
+{% block body%}
+<div class="container">
+    <h1>QR - код</h1>
+    <div class="block2">
+        <div class="info">
+            <h2 class="name">{{ view.name }} </h2>
+            <h2 class="date">{{ view.date_start }} - {{ view.date_end }}</h2>
+            <h2 class="link">{{ view.link }}</h2>     
+        </div>      
+    </div>
+    <div class="qr-code">
+        <div class="code" id="code">
+        </div>
+    </div>
+</div>    
+<script>
+    var qrcode = new QRCode("code","{{view.link}}");
+</script>
+{% endblock %}

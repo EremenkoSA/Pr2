@@ -17,7 +17,7 @@
     <h1>Вопросы по ивенту тест</h1>
     <div class="questions_and_grades">
         <div class="questions">
-            Список вопросов
+            <div class="info3">Список вопросов</div>
         {% for el in qq %}
             <div class="info_column">
                 <h2>{{ el.1.id }}. {{ el.1.text }}</h2>
@@ -25,7 +25,7 @@
         {% endfor %}
         </div>
         <div class="grades">
-            Средняя оценка
+            <div class="info3">Средняя оценка</div>
         {% for el in arr %}
             <div class="info_column2">
                 <h2>{{ el }}</h2>
@@ -33,5 +33,26 @@
         {% endfor %}
         </div>
     </div>
+    <div class="info3">
+        <div class="info_q_q">Вопрос</div>
+        <div class="info_g_g">Оценка</div>
+        <div class="info_c_c">
+            Комментарий
+        </div>
+    </div>
+    {% for el in res %}
+        <div class="info2">
+            <div class="info_q">
+                <h2>{{ el.0.questions_id }}</h2> 
+            </div>
+            <div class="info_g">
+                <h2>{{el.0.grade}}</h2> 
+            </div> 
+            <div class="info_c">
+                <h2>{{el.0.comment}}</h2> 
+            </div>
+        </div>        
+    {% endfor %} 
+
 </div>    
 {% endblock %}

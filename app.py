@@ -6,9 +6,10 @@ from sqlalchemy.ext.declarative import declarative_base
 import qrcode
 from fpdf import FPDF
 from flask_login import LoginManager
-from flask_login import login_user, login_required
+from flask_login import login_user, login_required, logout_user
 from flask_security import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gfgfgghghgfhgfhgfhgfhfgghghghghghg'
@@ -39,7 +40,7 @@ class User(db.Model, UserMixin):
     def is_authenticated(self):
         return True
 
-    def is_active(self):
+    def is_user_active(self):
         return True
 
     def is_anonymous(self):
@@ -107,15 +108,18 @@ def login_page():
     login = request.form.get('login')
     password = request.form.get('password')
     if login and password:
-        user = User.query.filter_by(login=login).first
+        user = User.query.filter_by(login=login).first()
         #user.is_active = True
 
-        if user and check_password_hash(user().password, password):
+        if user and check_password_hash(user.password, password):
             login_user(user)
 
             next_page = request.args.get('next')
-
-            redirect(next_page)
+            print(next_page)
+            if (next_page is None) or next_page == 'http://127.0.0.1:5000/logout':
+                return redirect('/')
+            else:
+                return redirect(next_page)
         else:
             flash('Login or password not correct')   
     else:
@@ -125,6 +129,7 @@ def login_page():
 
 
 @app.route('/register', methods=['POST', 'GET'])
+#@login_required
 def register():
     login = request.form.get('login')
     password = request.form.get('password')
@@ -148,8 +153,8 @@ def register():
 @app.route('/logout', methods=['POST', 'GET'])
 @login_required
 def logout():
-    login_user()
-    return redirect(url_for('/create_a'))
+    logout_user()
+    return redirect('login')
 
 @app.after_request
 def redirect_to_signin(responce):
@@ -159,14 +164,19 @@ def redirect_to_signin(responce):
     return responce    
 
 @app.route('/test/<int:id>')
+@login_required
 def re1(id):
     results = db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).all()
     for form, questions in results:
         print(form.questions_id, questions.text) 
     return render_template("test.html", res = results)    
     
-@app.route('/test3/<int:id>')
+@app.route('/event/report/<int:id>/r')
+@login_required
 def re3(id):
+    view = Event.query.get(id)
+    view2 = Answers.query.filter_by(event_id = id).all()
+    view3 = Questions.query.filter_by(id = Answers.questions_id).all()
     qq= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).all()
     results = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).order_by(Questions.id).order_by(Answers.grade).all()
     qq1= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).count()
@@ -186,7 +196,7 @@ def re3(id):
                 sum = sum + answers.grade
         rey = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).count()
         if rey != 0:
-            arr[i-1] = sum/rey 
+            arr[i-1] = round((sum/rey), 2)
         print(rey)
         sum = 0
         i = i + 1                      
@@ -231,7 +241,37 @@ def re3(id):
     #                     print(arr3)    
     #         i = i + 1
     # print              
-    return render_template("test3.html", res = results, qq =qq, arr = arr2)  
+    return render_template("test3r.html", res = results, qq =qq, arr = arr2, view=view, view2=view2, view3=view3) 
+
+@app.route('/event/report/<int:id>')
+def re4(id):
+    view = Event.query.get(id)
+    view2 = Answers.query.filter_by(event_id = id).all()
+    view3 = Questions.query.filter_by(id = Answers.questions_id).all()
+    qq= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).all()
+    results = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).order_by(Questions.id).order_by(Answers.grade).all()
+    qq1= db.session.query(Form, Questions).join(Questions).filter(Form.event_id == id).order_by(Questions.id).count()
+    sum = 0
+    arr = [0]*(10)
+    arr2 = [0]*qq1
+    i = 1
+    for i in range(10):
+        for answers, questions in results:
+            if questions.id == i:  
+                sum = sum + answers.grade
+        rey = db.session.query(Answers, Questions).join(Questions).filter(Answers.event_id == id).filter(Questions.id == i).count()
+        if rey != 0:
+            arr[i-1] =  round((sum/rey), 2)
+        print(rey)
+        sum = 0
+        i = i + 1 
+    for i in range(qq1):
+        for j in range(10):
+            if arr[j] != 0:
+                arr2[i] = arr[j]
+                del arr[j]
+                break                           
+    return render_template("report.html", qq =qq, arr = arr2, view=view, view2=view2, view3=view3)   
 
 @app.route('/test2/<int:id>',methods=['POST', 'GET'])
 def re2(id):
@@ -248,7 +288,7 @@ def re2(id):
             event_id = request.form['event_id'+str(form.id)]
             questions_id = request.form['questions_id'+str(form.id)]
             grade = request.form['grade'+str(form.id)]
-            comment = request.form['comment'+str(form.id)]
+            comment = request.form['comment-field'+str(form.id)]
 
         # event_id_3 = request.form['event_id_3']
         # questions_id_3 = request.form['questions_id_3']
@@ -281,6 +321,7 @@ def re2(id):
 
 #Создание ответа на определённый вопрос 
 @app.route('/create_a', methods=['POST', 'GET'])
+@login_required
 def created_answers():
     if request.method == "POST":
         event_id = request.form['event_id']
@@ -301,7 +342,7 @@ def created_answers():
 
 #Cписок ответов
 @app.route('/all_a')
-
+@login_required
 def all_answer():
     #all_answers = Answers.query.all()
     all_answers = User.query.filter_by(login='raiden').first
@@ -312,17 +353,20 @@ def all_answer():
     return render_template("all_answer.html", el=all_answers)
 
 @app.route('/123')
+@login_required
 def fdz():
     return render_template("main.html")
 
 #Подробности про ответ
 @app.route('/a/<int:id>')
+@login_required
 def a_view(id):
     view_a = Answers.query.get(id)
     return render_template("view_answer.html", view_a=view_a)
 
 #Удаление ответа
 @app.route('/a/<int:id>/del')
+@login_required
 def a_delete(id):
     delete_a = Answers.query.get_or_404(id)
 
@@ -336,6 +380,7 @@ def a_delete(id):
 
 #Изменение ответа
 @app.route('/a/<int:id>/update', methods=['POST', 'GET'])
+@login_required
 def a_update(id):
     update = Answers.query.get(id)
     if request.method == "POST":
@@ -360,6 +405,7 @@ def a_update(id):
 #ВОПРОСЫ
 #Создание вопроса
 @app.route('/create_q', methods=['POST', 'GET'])
+@login_required
 def created_question():
     if request.method == "POST":
         text = request.form['text']
@@ -377,6 +423,7 @@ def created_question():
 
 #Cписок вопросов
 @app.route('/all_q')
+@login_required
 def all_question():
     all_questions = Questions.query.all()
     return render_template("all_question.html", all_questions=all_questions)
@@ -384,13 +431,23 @@ def all_question():
 
 #Подробности про вопрос
 @app.route('/q/<int:id>')
+@login_required
 def q_view(id):
     view_q = Questions.query.get(id)
     return render_template("view_question.html", view_q=view_q)
 
+@app.route('/spravka')
+def spravka():
+    return render_template("spravka.html")
+
+@app.route('/spravka/r')
+@login_required
+def spravkar():
+    return render_template("spravkar.html")
 
 #Удаление вопроса
 @app.route('/q/<int:id>/del')
+@login_required
 def q_delete(id):
     delete_q = Questions.query.get_or_404(id)
 
@@ -404,6 +461,7 @@ def q_delete(id):
 
 #Изменение вопроса
 @app.route('/q/<int:id>/update', methods=['POST', 'GET'])
+@login_required
 def q_update(id):
     update = Questions.query.get(id)
     if request.method == "POST":
@@ -434,6 +492,7 @@ def q_update(id):
 #Назнание пдфки с qrcode будет id ивента + .pdf 
 #Будем просматривать прошедшие мероприятия и удалять qrcode 
 @app.route('/create_e', methods=['POST', 'GET'])
+@login_required
 def survey():
     #return render_template("survey.html")
     if request.method == "POST":
@@ -463,18 +522,17 @@ def index():
     past_event = Event.query.filter(Event.date_end < current_date).all()
     return render_template("index.html", ongoing_event=ongoing_event, future_event=future_event, past_event=past_event)
 
+@app.route('/event/qr/<int:id>')
+def qr_view(id):
+    view = Event.query.get(id)
+    return render_template("qr.html", view=view)
 
 @app.route('/event/<int:id>')
+@login_required
 def event_view(id):
     view = Event.query.get(id)
     return render_template("view.html", view=view)
 
-@app.route('/event/report/<int:id>')
-def report_view(id):
-    view = Event.query.get(id)
-    view2 = Answers.query.filter_by(event_id = id).all()
-    view3 = Questions.query.filter_by(id = Answers.questions_id).all()
-    return render_template("report.html", view=view, view2=view2, view3=view3)
 
 
 # @app.route('/event/survey/<int:id>')
@@ -487,6 +545,7 @@ def report_view(id):
 
 #Удаление ивента
 @app.route('/event/<int:id>/del')
+@login_required
 def event_delete(id):
     delete_event = Event.query.get_or_404(id)
 
@@ -500,6 +559,7 @@ def event_delete(id):
 
 #Изменение ивента
 @app.route('/event/<int:id>/update', methods=['POST', 'GET'])
+@login_required
 def event_update(id):
     update = Event.query.get(id)
     if request.method == "POST":
@@ -525,6 +585,7 @@ def event_update(id):
 #ФОРМА ид вопроса ид ивента
 #Создание ответа на определённый вопрос 
 @app.route('/create_f', methods=['POST', 'GET'])
+@login_required
 def created_form():
     if request.method == "POST":
         event_id = request.form['event_id']
@@ -543,6 +604,7 @@ def created_form():
 
 #Cписок ответов
 @app.route('/all_f')
+@login_required
 def all_form():
     all_form = Form.query.all()
     return render_template("all_form.html", all_form=all_form)
@@ -550,12 +612,14 @@ def all_form():
 
 #Подробности про ответ
 @app.route('/f/<int:id>')
+@login_required
 def f_view(id):
     view_f = Form.query.get(id)
     return render_template("view_form.html", view_f=view_f)
 
 #Удаление ответа
 @app.route('/f/<int:id>/del')
+@login_required
 def f_delete(id):
     delete_f = Form.query.get_or_404(id)
 
@@ -569,6 +633,7 @@ def f_delete(id):
 
 #Изменение ответа
 @app.route('/f/<int:id>/update', methods=['POST', 'GET'])
+@login_required
 def f_update(id):
     update = Form.query.get(id)
     if request.method == "POST":

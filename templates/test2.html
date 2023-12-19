@@ -5,37 +5,193 @@
 {% endblock %}
 
 {% block body%}
+<style>
+    #comment-field {
+        display: none;
+    }
+    #comment-field1 {
+        display: none;
+    }
+    #comment-field2 {
+        display: none;
+    }
+    #comment-field3 {
+        display: none;
+    }
+    #comment-field4 {
+        display: none;
+    }
+    #comment-field5 {
+        display: none;
+    }
+    #comment-field6 {
+        display: none;
+    }
+    #comment-field7 {
+        display: none;
+    }
+    #comment-field8 {
+        display: none;
+    }
+    #comment-field9 {
+        display: none;
+    }
+    #comment-field10 {
+        display: none;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput1 = document.querySelector('[id="grade1"]');
+        const commentField1 = document.querySelector('#comment-field1');
+        ratingInput1.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField1.style.display = 'block';
+            } else {
+                commentField1.style.display = 'none';
+            }
+        });
+    });
+</script>
 
 <script>
-    let spans = document.querySelectorAll(".counter");
-
-    for (let i = 0; i < spans.length; i++) {
-        let span = spans[i];
-        span.innerText = i + 1;
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput2 = document.querySelector('[id="grade2"]');
+        const commentField2 = document.querySelector('#comment-field2');
+        ratingInput2.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField2.style.display = 'block';
+            } else {
+                commentField2.style.display = 'none';
+            }
+        });
+    });
 </script>
-    
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput3 = document.querySelector('[id="grade3"]');
+        const commentField3 = document.querySelector('#comment-field3');
+        ratingInput3.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField3.style.display = 'block';
+            } else {
+                commentField3.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput4 = document.querySelector('[id="grade4"]');
+        const commentField4 = document.querySelector('#comment-field4');
+        ratingInput4.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField4.style.display = 'block';
+            } else {
+                commentField4.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput5 = document.querySelector('[id="grade5"]');
+        const commentField5 = document.querySelector('#comment-field5');
+        ratingInput5.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField5.style.display = 'block';
+            } else {
+                commentField5.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput6 = document.querySelector('[id="grade6"]');
+        const commentField6 = document.querySelector('#comment-field6');
+        ratingInput6.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField6.style.display = 'block';
+            } else {
+                commentField6.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput7 = document.querySelector('[id="grade7"]');
+        const commentField7 = document.querySelector('#comment-field7');
+        ratingInput7.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField7.style.display = 'block';
+            } else {
+                commentField7.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput9 = document.querySelector('[id="grade9"]');
+        const commentField9 = document.querySelector('#comment-field9');
+        ratingInput9.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField9.style.display = 'block';
+            } else {
+                commentField9.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput8 = document.querySelector('[id="grade8"]');
+        const commentField8 = document.querySelector('#comment-field8');
+        ratingInput8.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField8.style.display = 'block';
+            } else {
+                commentField8.style.display = 'none';
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInput10 = document.querySelector('[id="grade10"]');
+        const commentField10 = document.querySelector('#comment-field10');
+        ratingInput10.addEventListener('change', function () {
+            const value = +this.value;
+            if (value === 1 || value === 2) {
+                commentField10.style.display = 'block';
+            } else {
+                commentField10.style.display = 'none';
+            }
+        });
+    });
+</script>
 <div class="container">
     <h1>Вопросы по ивенту тест</h1>
-         <div class="info">
             {% for el in res %}
-                <h2>{{ el.0.id }} {{ el.0.questions_id }} {{ el.0.event_id }}</h2>
-                <h2>{{ el.1.text}}</h2>
                 <form method="post">
+                    <h2>{{ el.1.text}}</h2>
                     <input type="hidden" name="event_id{{el.0.id}}" id="event_id" value="{{ el.0.event_id }} " class="form-control" ><br>
                     <input type="hidden" name="questions_id{{el.0.id}}" id="questions_id" value="{{ el.0.questions_id}}" class="form-control" ><br>
-                    <input type="number" min="1" max="5" class="form-control" id="grade" name="grade{{el.0.id}}"/>
-                    <input type="varchar(100)" name="comment{{el.0.id}}" id="comment" class="form-control" ><br>
+                    <input type="number" min="1" max="5" class="form-control" id="grade{{el.0.id}}" name="grade{{el.0.id}}"/>
+                    <input type="varchar(100)" name="comment-field{{el.0.id}}" id="comment-field{{el.0.id}}" class="form-control" ><br>  
             {% endfor %}
-            <input type="submit" class="btn btn-success" value="Отправить">
-        </form>
-        <datalist id="gradeList">
-            <option value="1" />
-            <option value="2" />
-            <option value="3" />
-            <option value="4" />
-            <option value="5" />
-        </datalist>
-        </div>  
+                <input type="submit" class="btn btn-success" value="Отправить">
+            </form> 
 </div>    
 {% endblock %}

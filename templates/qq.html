@@ -10,32 +10,35 @@
         display: none;
     }
 </style>
-    <script>
-        const ratingInput = document.querySelector('[name="rating"]');
-        const commentField = document.querySelector('#comment-field');
-
-        ratingInput.addEventListener('input', function () {
-        if (+this.value == 1 || +this.value == 2) {
-            commentField.style.display = 'block';
-        } else {
-            commentField.style.display = 'none';
-        }
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInputs = document.querySelectorAll('[name="rating"]');
+        ratingInputs.forEach(ratingInput => {
+            ratingInput.addEventListener('change', function () {
+                const commentField = this.nextElementSibling.nextElementSibling;
+                const value = +this.value;
+                commentField.style.display = (value === 1 || value === 2) ? 'block' : 'none';
+            });
         });
-    </script>
+    });
+</script>
 </head>
 <body>
 <h1>Оцените и оставьте комментарий</h1>
 
 <form action="/submit-comment" method="post">
-
     <!-- Оценка -->
     <input type="number" name="rating" min="1" max="5"/>
-
     <!-- Комментарий -->
-    <label for="comment-field">Ваш комментарий:</label>
+    <label for="comment-field-1">Ваш комментарий:</label>
     <br/>
-    <textarea name="comment" id="comment-field"></textarea>
-
+    <textarea name="comment" id="comment-field-1" class="comment-field"></textarea>
+    <!-- Оценка -->
+    <input type="number" name="rating" min="1" max="5"/>
+    <!-- Комментарий -->
+    <label for="comment-field-2">Ваш комментарий:</label>
+    <br/>
+    <textarea name="comment" id="comment-field-2" class="comment-field"></textarea>
     <button type="submit">Отправить</button>
 </form>
 </body>
