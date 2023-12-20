@@ -186,10 +186,10 @@
             {% for el in res %}
                 <form method="post">
                     <h2>{{ el.1.text}}</h2>
-                    <input type="hidden" name="event_id{{el.0.id}}" id="event_id" value="{{ el.0.event_id }} " class="form-control" ><br>
+                    <input type="hidden" name="event_id{{el.0.id}}" id="event_id" value="{{ el.0.event_id }} "  class="form-control" ><br>
                     <input type="hidden" name="questions_id{{el.0.id}}" id="questions_id" value="{{ el.0.questions_id}}" class="form-control" ><br>
-                    <input type="number" min="1" max="5" class="form-control" id="grade{{el.0.id}}" name="grade{{el.0.id}}"/>
-                    <input type="varchar(100)" name="comment-field{{el.0.id}}" id="comment-field{{el.0.id}}" class="form-control" ><br>  
+                    <input type="number" min="1" max="5" class="form-control" id="grade{{el.0.id}}" placeholder="оценка" name="grade{{el.0.id}}"/>
+                    <input type="varchar(100)" name="comment-field{{el.0.id}}" id="comment-field{{el.0.id}}" placeholder="комментарий" class="form-control" ><br>  
             {% endfor %}
                 <input type="submit" class="btn btn-success" value="Отправить">
             </form> 
